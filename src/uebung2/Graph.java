@@ -5,7 +5,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -18,164 +20,250 @@ import java.util.stream.Collectors;
 /// **************************************
 public class Graph {
 
-    public class Vertex {
-        final int id;
-        final ArrayList<Integer> adjacentNodes = new ArrayList<>();
-        
-        public Vertex(int id){
-            this.id = id;
-        }
+	public class Vertex {
+		final int id;
+		final ArrayList<Integer> adjacentNodes = new ArrayList<>();
 
-        boolean hasConnectedVertices(){
-            return !adjacentNodes.isEmpty();
-        }
+		public Vertex(int id) {
+			this.id = id;
+		}
 
-        ArrayList<Vertex> getConnectedVertices(){
-            ArrayList<Vertex> list = new ArrayList<>();
-            for(int nodeID : adjacentNodes){
-                list.add(vertices.get(nodeID));
-            }
-            return list;
-        }
+		boolean hasConnectedVertices() {
+			return !adjacentNodes.isEmpty();
+		}
 
-        /// node degree
-        int getConnectedVerticesCount(){
-            return adjacentNodes.size();
-        }
+		ArrayList<Vertex> getConnectedVertices() {
+			ArrayList<Vertex> list = new ArrayList<>();
+			for (int nodeID : adjacentNodes) {
+				list.add(vertices.get(nodeID));
+			}
+			return list;
+		}
 
-        ArrayList<Integer> getConnectedNodeIDs(){
-            return adjacentNodes;
-        }
+		/// node degree
+		int getConnectedVerticesCount() {
+			return adjacentNodes.size();
+		}
 
-        void addEdgeTo(Vertex v){
-            addEdge(this, v);
-        }
+		ArrayList<Integer> getConnectedNodeIDs() {
+			return adjacentNodes;
+		}
 
-        void addEdgeTo(int v){
-            addEdge(this.id, v);
-        }
-    }
+		void addEdgeTo(Vertex v) {
+			addEdge(this, v);
+		}
 
-    /// adjacency list
-    final private ArrayList<Vertex> vertices;
+		void addEdgeTo(int v) {
+			addEdge(this.id, v);
+		}
+	}
 
-    /// Creates an empty graph with V vertices (vertex == node)
-    public Graph(int vertexCount) {
-        if (vertexCount < 0) throw new IllegalArgumentException("Number of vertices should not be negative\n");
-        vertices = new ArrayList<>(vertexCount);
-        for (int v = 0; v < vertexCount; v++)
-            vertices.add(new Vertex(v));
-    }
+	/// adjacency list
+	final private ArrayList<Vertex> vertices;
 
-    /// loads graph from file
-    public static Graph fromFile(String file){
-        Path path = Paths.get(file);
-        try {
-            List<int[]> parseResult =
-                    Files.readAllLines(Paths.get(file))
-                            .stream()
-                            .map(x -> x.split(" "))
-                            .flatMap(Arrays::stream)
-                            .filter(x -> !x.isEmpty())
-                            .map(x -> x.replaceAll("\\{", "").replaceAll("}", "").replaceAll(" ", ""))
-                            .map(x -> x.split(","))
-                            .map(x -> new int[]{ Integer.parseInt(x[0]), Integer.parseInt(x[1]) })
-                            .collect(Collectors.toList());
-            int maxIndex = parseResult.stream().flatMapToInt(Arrays::stream).max().getAsInt();
-            Graph graph = new Graph(maxIndex + 1);
-            for(int[] arr : parseResult){
-                graph.addEdge(arr[0], arr[1]);
-            }
-            return graph;
-        }catch (Exception e){
-            System.out.println("Something went wrong when trying to load your file " + path.toAbsolutePath().toString());
-            throw new RuntimeException(e);
-        }
-    }
+	/// Creates an empty graph with V vertices (vertex == node)
+	public Graph(int vertexCount) {
+		if (vertexCount < 0)
+			throw new IllegalArgumentException("Number of vertices should not be negative\n");
+		vertices = new ArrayList<>(vertexCount);
+		for (int v = 0; v < vertexCount; v++)
+			vertices.add(new Vertex(v));
+	}
 
-    // Creates a graph as copy of G
-    public Graph clone(){
-        Graph graph = new Graph(vertices.size());
-        for(Vertex v : vertices){
-            for(Integer e : v.adjacentNodes){
-                graph.vertices.get(v.id).adjacentNodes.add(e);
-            }
-        }
-        return graph;
-    }
+	/// loads graph from file
+	public static Graph fromFile(String file) {
+		Path path = Paths.get(file);
+		try {
+			List<int[]> parseResult = Files.readAllLines(Paths.get(file)).stream().map(x -> x.split(" "))
+					.flatMap(Arrays::stream).filter(x -> !x.isEmpty())
+					.map(x -> x.replaceAll("\\{", "").replaceAll("}", "").replaceAll(" ", "")).map(x -> x.split(","))
+					.map(x -> new int[] { Integer.parseInt(x[0]), Integer.parseInt(x[1]) })
+					.collect(Collectors.toList());
+			int maxIndex = parseResult.stream().flatMapToInt(Arrays::stream).max().getAsInt();
+			Graph graph = new Graph(maxIndex + 1);
+			for (int[] arr : parseResult) {
+				graph.addEdge(arr[0], arr[1]);
+			}
+			return graph;
+		} catch (Exception e) {
+			System.out
+					.println("Something went wrong when trying to load your file " + path.toAbsolutePath().toString());
+			throw new RuntimeException(e);
+		}
+	}
 
-    /// Prints the graph
-    public void display() {
-        for (Vertex v : vertices) {
-            System.out.println(v.id + ": " + Arrays.toString(v.adjacentNodes.toArray()));
-        }
-    }
+	// Creates a graph as copy of G
+	public Graph clone() {
+		Graph graph = new Graph(vertices.size());
+		for (Vertex v : vertices) {
+			for (Integer e : v.adjacentNodes) {
+				graph.vertices.get(v.id).adjacentNodes.add(e);
+			}
+		}
+		return graph;
+	}
 
-    /// Adds an edge
-    public void addEdge(int v, int w) {
-        vertices.get(v).adjacentNodes.add(w);
-        vertices.get(w).adjacentNodes.add(v);
-    }
+	/// Prints the graph
+	public void display() {
+		for (Vertex v : vertices) {
+			System.out.println(v.id + ": " + Arrays.toString(v.adjacentNodes.toArray()));
+		}
+	}
 
-    /// Adds an edge
-    public void addEdge(Vertex v, Vertex w) {
-        addEdge(v.id, w.id);
-    }
+	/// Adds an edge
+	public void addEdge(int v, int w) {
+		vertices.get(v).adjacentNodes.add(w);
+		vertices.get(w).adjacentNodes.add(v);
+	}
 
-    /// Deletes an edge
-    public void deleteEdge(Integer v, Integer w) {
-        vertices.get(v).adjacentNodes.remove(w);
-        vertices.get(w).adjacentNodes.remove(v);
-    }
+	/// Adds an edge
+	public void addEdge(Vertex v, Vertex w) {
+		addEdge(v.id, w.id);
+	}
 
-    /// Deletes an edge
-    public void deleteEdge(Vertex v, Vertex w) {
-        deleteEdge(v.id, w.id);
-    }
+	/// Deletes an edge
+	public void deleteEdge(Integer v, Integer w) {
+		vertices.get(v).adjacentNodes.remove(w);
+		vertices.get(w).adjacentNodes.remove(v);
+	}
 
-    /// Returns first node
-    public Vertex getRootVertex() {
-        if (getNodeCount() == 0) throw new RuntimeException("Graph is empty\n");
-        return vertices.get(0);
-    }
+	/// Deletes an edge
+	public void deleteEdge(Vertex v, Vertex w) {
+		deleteEdge(v.id, w.id);
+	}
 
-    public Vertex getNode(int id){
-        return vertices.get(id);
-    }
+	/// Returns first node
+	public Vertex getRootVertex() {
+		if (getNodeCount() == 0)
+			throw new RuntimeException("Graph is empty\n");
+		return vertices.get(0);
+	}
 
-    /// Returns number of vertices
-    public int getNodeCount() {
-        return vertices.size();
-    }
+	public Vertex getNode(int id) {
+		return vertices.get(id);
+	}
 
-    public ArrayList<Vertex> getVertices(){
-        return vertices;
-    }
+	/// Returns number of vertices
+	public int getNodeCount() {
+		return vertices.size();
+	}
 
-    /// Returns whether graph is connected
-    public boolean connected() {
-        // Trivially connected
-        if (vertices.size() < 2) return true;
+	public ArrayList<Vertex> getVertices() {
+		return vertices;
+	}
 
-        // Try to visit all vertices using depth first search
-        boolean[] visited = new boolean[vertices.size()];
+	/// Returns whether graph is connected
+	public boolean connected() {
+		// Trivially connected
+		if (vertices.size() < 2)
+			return true;
 
-        Stack<Integer> nextNodes = new Stack<>();
-        visited[0] = true;
-        nextNodes.push(0);
-        while (nextNodes.size() > 0) {
-            int v = nextNodes.pop();
-            List<Integer> neighbors = getNode(v).getConnectedNodeIDs();
-            for(Integer w : neighbors)
-            {
-                if (!visited[w]) {
-                    visited[w] = true;
-                    nextNodes.push(w);
-                }
-            }
-        }
-        for (int v = 0; v < vertices.size(); v++)
-            if (!visited[v]) return false;
-        return true;
-    }
+		// Try to visit all vertices using depth first search
+		boolean[] visited = new boolean[vertices.size()];
+
+		Stack<Integer> nextNodes = new Stack<>();
+		visited[0] = true;
+		nextNodes.push(0);
+		while (nextNodes.size() > 0) {
+			int v = nextNodes.pop();
+			List<Integer> neighbors = getNode(v).getConnectedNodeIDs();
+			for (Integer w : neighbors) {
+				if (!visited[w]) {
+					visited[w] = true;
+					nextNodes.push(w);
+				}
+			}
+		}
+		for (int v = 0; v < vertices.size(); v++)
+			if (!visited[v])
+				return false;
+		return true;
+	}
+
+	public int countConnections() {
+		int count = 0;
+
+//		ArrayList<Vertex> erreichbareKnoten = new ArrayList<Graph.Vertex>();
+//		ArrayList<Vertex> besuchteKnoten = new ArrayList<Graph.Vertex>();
+
+		// 1. markiere irgendeinen Startknoten v als erreichbar
+//		erreichbareKnoten.add(this.getVertices().get(0));
+
+		// while ein Knoten v ist erreichbar:
+//		for (int i = 0; i < erreichbareKnoten.size(); i++) {
+//			Vertex v = erreichbareKnoten.get(i);
+//			
+//			// lösche v als besucht
+//			besuchteKnoten.add(v);
+//
+//			// für alle Nachfolger w von v:
+//			// if w unbesucht und noch nicht als erreichbar markiert dann:
+//			for (Vertex w : v.getConnectedVertices()) {
+//				if (besuchteKnoten.indexOf(w) < 0 && erreichbareKnoten.indexOf(w) < 0) {
+//					//Kanten zählen
+//					count++;
+//					erreichbareKnoten.add(w);
+//				}
+//			}
+//		}
+
+		// just traverse and count each connections
+		for (Vertex vertex : vertices) {
+			count += vertex.getConnectedVerticesCount();
+		}
+
+		return count / 2;
+
+	}
+
+	protected void DFS(Vertex v, ArrayList<Vertex> visitedV, Vertex searchV) {
+		visitedV.add(v);
+
+		System.out.println("besucht: " + v.id);
+
+		if (v.equals(searchV)) {
+			System.out.println("Knoten gefunden: " + searchV.id);
+			return;
+		}
+
+		for (Vertex w : v.getConnectedVertices()) {
+			if (visitedV.indexOf(w) < 0) {
+				DFS(w, visitedV, searchV);
+			}
+		}
+	}
+
+	public void DFS(Vertex searchV) {
+		ArrayList<Vertex> visitedV = new ArrayList<Graph.Vertex>();
+
+		DFS(this.getVertices().get(0), visitedV, searchV);
+
+	}
+
+	public void BFS(Vertex searchV) {
+		ArrayList<Vertex> visitedV = new ArrayList<Graph.Vertex>();
+
+		LinkedList<Vertex> queue = new LinkedList<Graph.Vertex>();
+
+		visitedV.add(getRootVertex());
+		queue.add(getRootVertex());
+
+		while (queue.size() > 0) {
+			Vertex v = queue.poll();
+			System.out.println("besucht: " + v.id);
+
+			if (v.equals(searchV)) {
+				System.out.println("Knoten gefunden: " + searchV.id);
+				return;
+			}
+
+			for (Vertex w : v.getConnectedVertices()) {
+				if (visitedV.indexOf(w) < 0) {
+					visitedV.add(w);
+				}
+				queue.add(w);
+			}
+		}
+
+	}
 }
