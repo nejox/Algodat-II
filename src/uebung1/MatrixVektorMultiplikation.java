@@ -1,8 +1,7 @@
 package uebung1;
 
 public class MatrixVektorMultiplikation {
-	static double additionen = 0;
-	static double multiplikationen = 0;
+	static double operationen = 0;
 
 	public static void main(String[] args) {
 
@@ -16,8 +15,7 @@ public class MatrixVektorMultiplikation {
 //			System.out.println(result[i]);
 //		}
 //		
-//		System.out.println("Additionen: "+additionen);
-//		System.out.println("Multiplikationen: "+multiplikationen);
+//		System.out.println("Operationen: "+Operationen);
 
 		// (A*x)/||A*x||
 		for (int j = 0; j < 10; j++) {
@@ -42,8 +40,7 @@ public class MatrixVektorMultiplikation {
 			double erg = 0;
 			for (int j = 0; j < matrix[i].length; j++) {
 				erg += matrix[i][j] * vektor[j];
-				multiplikationen++;
-				additionen++;
+				operationen++;
 			}
 			result[i] = erg;
 		}
