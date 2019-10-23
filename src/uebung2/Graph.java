@@ -183,36 +183,43 @@ public class Graph {
 	public int countConnections() {
 		int count = 0;
 
-//		ArrayList<Vertex> erreichbareKnoten = new ArrayList<Graph.Vertex>();
-//		ArrayList<Vertex> besuchteKnoten = new ArrayList<Graph.Vertex>();
+		boolean[] visited = new boolean[this.getNodeCount()];
+		ArrayList<Vertex> erreichbareKnoten = new ArrayList<Graph.Vertex>();
 
 		// 1. markiere irgendeinen Startknoten v als erreichbar
-//		erreichbareKnoten.add(this.getVertices().get(0));
+		erreichbareKnoten.add(this.getRootVertex());
 
-		// while ein Knoten v ist erreichbar:
-//		for (int i = 0; i < erreichbareKnoten.size(); i++) {
-//			Vertex v = erreichbareKnoten.get(i);
-//			
-//			// lösche v als besucht
-//			besuchteKnoten.add(v);
-//
-//			// für alle Nachfolger w von v:
-//			// if w unbesucht und noch nicht als erreichbar markiert dann:
-//			for (Vertex w : v.getConnectedVertices()) {
-//				if (besuchteKnoten.indexOf(w) < 0 && erreichbareKnoten.indexOf(w) < 0) {
-//					//Kanten zählen
-//					count++;
-//					erreichbareKnoten.add(w);
-//				}
-//			}
-//		}
+		for (Vertex vertex : this.getVertices()) {
 
-		// just traverse and count each connections
-		for (Vertex vertex : vertices) {
-			count += vertex.getConnectedVerticesCount();
+			// jeden Knoten durchlaufen
+			if (!visited[vertex.id]) {
+				count++;
+				
+				// while ein Knoten v ist erreichbar:
+				for (int i = 0; i < erreichbareKnoten.size(); i++) {
+					Vertex v = erreichbareKnoten.get(i);
+
+					// lösche v als besucht
+					visited[v.id] = true;
+
+					// für alle Nachfolger w von v:
+					// if w unbesucht und noch nicht als erreichbar markiert dann:
+					for (Vertex w : v.getConnectedVertices()) {
+						if (!visited[w.id] && erreichbareKnoten.indexOf(w) < 0) {
+							// markiere w als erreichbar
+							erreichbareKnoten.add(w);
+						}
+					}
+				}
+			} else {
+				// falls bereits besucht - teil der Zusammenhangskomponente
+				continue;
+			}
 		}
 
-		return count / 2;
+
+
+		return count;
 
 	}
 
