@@ -223,22 +223,19 @@ public class Graph {
 		hStack.push(v);
 		while (hStack.size() > 0) {
 			v = hStack.pop();
-			// push Knoten zur Tour
-			if (v != 0) {
-				oTour.push(v);
-			}
+
 			// while Knoten Kanten hat
 			while (graphCopy.getNode(v).hasConnectedVertices()) {
 
+				hStack.push(v);
 				// zum nächsten Knoten gehen
 				int w = graphCopy.getNode(v).getConnectedNodeIDs().get(0);
-
-				hStack.push(w);
-
 				// Kante löschen
 				graphCopy.deleteEdge(v, w);
 				v = w;
 			}
+			// push Knoten zur Tour
+			oTour.push(v);
 		}
 		oTour.push(start);
 
