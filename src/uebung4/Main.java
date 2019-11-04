@@ -66,7 +66,7 @@ public class Main {
         }
         
         // array shit
-        DijkstraArray oArray = new DijkstraArray(oGraph.getNodeCount());
+        ArrayHeap oArray = new ArrayHeap(oGraph.getNodeCount());
         pi[vStart] = 0.0;
         oArray.insert(vStart, pi[vStart]);
         while (!oArray.empty()) {

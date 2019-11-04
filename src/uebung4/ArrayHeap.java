@@ -1,12 +1,12 @@
 package uebung4;
 
-public class DijkstraArray implements IndexedPriorityQueue {
+public class ArrayHeap implements IndexedPriorityQueue {
 	private int size;
 	private boolean[] list;
 	private double[] weights;
 	private int costs = 0;
 
-	public DijkstraArray(int size) {
+	public ArrayHeap(int size) {
 		this.size = size;
 		list = new boolean[size];
 		weights = new double[size];
@@ -50,6 +50,8 @@ public class DijkstraArray implements IndexedPriorityQueue {
 
 	@Override
 	public void insert(int index, double key) {
+		if (contains(index))
+			return;
 		list[index] = true;
 		weights[index] = key;
 	}
