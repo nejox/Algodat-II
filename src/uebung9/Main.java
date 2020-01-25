@@ -1,75 +1,95 @@
 package uebung9;
 
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Main {
 
-    public static void main(String[] args) {
-    	
-    	aufgabe1();
-    	
-        // Set Graph
-        int oKnoten = 7;
-        int[][] oKanten =
-                {{0, 1, 3}, {0, 2, 2}, {0, 3, 3}, {1, 3, 2}, {1, 4, 1}, {2, 5, 2}, {2, 6, 7},
-                        {3, 4, 2}, {3, 5, 3}, {3, 6, 4}, {4, 6, 1}, {5, 6, 3}};
+	public static void main(String[] args) {
 
-        UndirectedWeightedGraph oGraph = new UndirectedWeightedGraph(oKnoten);
-        for (int i = 0; i < oKanten.length; i++) {
-            oGraph.addEdge(oKanten[i][0], oKanten[i][1], oKanten[i][2]);
-        }
+		aufgabe1();
 
-        // Display the graph
-        oGraph.display();
+		// Set Graph
+		int oKnoten = 7;
+		int[][] oKanten = { { 0, 1, 3 }, { 0, 2, 2 }, { 0, 3, 3 }, { 1, 3, 2 }, { 1, 4, 1 }, { 2, 5, 2 }, { 2, 6, 7 },
+				{ 3, 4, 2 }, { 3, 5, 3 }, { 3, 6, 4 }, { 4, 6, 1 }, { 5, 6, 3 } };
 
-        // idea:
-        // greedy approach,
-        // iteratively grow spanning tree by respective shortest connection
-        // reachable nodes are efficiently stored in a heap
+		UndirectedWeightedGraph oGraph = new UndirectedWeightedGraph(oKnoten);
+		for (int i = 0; i < oKanten.length; i++) {
+			oGraph.addEdge(oKanten[i][0], oKanten[i][1], oKanten[i][2]);
+		}
 
-        double[] pi = new double[oGraph.getNodeCount()];    //reachable vertices length
-        int[] pred = new int[oGraph.getNodeCount()];        //predeceesor nodes for these paths
+		// Display the graph
+		oGraph.display();
 
-        for (int i = 0; i < oGraph.getNodeCount(); i++) {
-            pi[i] = Double.POSITIVE_INFINITY;
-            pred[i] = -1;
-        }
+		// idea:
+		// greedy approach,
+		// iteratively grow spanning tree by respective shortest connection
+		// reachable nodes are efficiently stored in a heap
 
-        int v = oGraph.getRootVertex().id; // v=0			//start for the spanning tree
-        pi[v] = 0.0;
+		double[] pi = new double[oGraph.getNodeCount()]; // reachable vertices length
+		int[] pred = new int[oGraph.getNodeCount()]; // predeceesor nodes for these paths
 
-        IndexedHeap oHeap = new IndexedHeap(oGraph.getNodeCount());    //all nodes have to be covered yet
-        for (int i = 0; i < oGraph.getNodeCount(); i++) {
-            oHeap.insert(i, pi[i]);
-        }
+		for (int i = 0; i < oGraph.getNodeCount(); i++) {
+			pi[i] = Double.POSITIVE_INFINITY;
+			pred[i] = -1;
+		}
 
-        while (!oHeap.empty()) {
-            v = oHeap.deleteMin();            //minimum reachable node
-            List<UndirectedWeightedGraph.Edge> oEdges = oGraph.getNode(v).getEdges();
-            for (UndirectedWeightedGraph.Edge edge : oEdges)    //test edges from v
-            {
-                int w = edge.to;
-                if (oHeap.contains(w) && edge.weight < pi[w]) {
-                    pred[w] = v;
-                    pi[w] = edge.weight;
-                    oHeap.change(w, pi[w]);
-                }
-            }
-        }
+		int v = oGraph.getRootVertex().id; // v=0 //start for the spanning tree
+		pi[v] = 0.0;
 
-        // Output spanning tree
-        System.out.println("Spanning tree:");
-        double sum = 0.0;
-        for (int i = 0; i < oGraph.getNodeCount(); i++) {
-            System.out.print("edge " + i + "-" + pred[i] + " ");
-            sum += pi[i];
-        }
-        System.out.println();
-        System.out.println("with length: " + sum);
-    }
-    
-    public static void aufgabe1() {
-    	//UndirectedWeightedGraph oGraph = UndirectedWeightedGraph.fromFile("src/uebung9/some_points.txt");
-    }
+		IndexedHeap oHeap = new IndexedHeap(oGraph.getNodeCount()); // all nodes have to be covered yet
+		for (int i = 0; i < oGraph.getNodeCount(); i++) {
+			oHeap.insert(i, pi[i]);
+		}
+
+		while (!oHeap.empty()) {
+			v = oHeap.deleteMin(); // minimum reachable node
+			List<UndirectedWeightedGraph.Edge> oEdges = oGraph.getNode(v).getEdges();
+			for (UndirectedWeightedGraph.Edge edge : oEdges) // test edges from v
+			{
+				int w = edge.to;
+				if (oHeap.contains(w) && edge.weight < pi[w]) {
+					pred[w] = v;
+					pi[w] = edge.weight;
+					oHeap.change(w, pi[w]);
+				}
+			}
+		}
+
+		// Output spanning tree
+		System.out.println("Spanning tree:");
+		double sum = 0.0;
+		for (int i = 0; i < oGraph.getNodeCount(); i++) {
+			System.out.print("edge " + i + "-" + pred[i] + " ");
+			sum += pi[i];
+		}
+		System.out.println();
+		System.out.println("with length: " + sum);
+	}
+
+	public static void aufgabe1() {
+		// UndirectedWeightedGraph oGraph =
+		// UndirectedWeightedGraph.fromFile("src/uebung9/some_points.txt");
+
+		// Set Points
+		List<Point> liste = new ArrayList<Point>();
+		try (BufferedReader br = new BufferedReader(new FileReader("/some_points.txt"))) {
+			int index = 1;
+			while (br.ready()) {
+				String line = br.readLine();
+				double lon = Double.valueOf(line.substring(0, line.indexOf(";")));
+				double lat = Double.valueOf(line.substring(line.indexOf(";")));
+				liste.add(new Point(index, lon, lat));
+				index++;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// Set Graph
+
+	}
 }
